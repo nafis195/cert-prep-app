@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not vendor %}
+  <p>Vendor not found.</p>
+{% else %}
+  <h2>{{ vendor.name }} Certifications</h2>
+  <ul>
+    {% for cert in certifications %}
+      <li>
+        <a href="/certification/{{ cert.id }}">{{ cert.name }}</a>
+        {% if cert.exam_code %} ({{ cert.exam_code }}){% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
+

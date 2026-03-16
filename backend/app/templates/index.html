@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Select a vendor</h2>
+<select id="vendor-select" onchange="if(this.value) window.location='/vendor/' + this.value;">
+  <option value="">-- Choose vendor --</option>
+  {% for vendor in vendors %}
+    <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+  {% endfor %}
+</select>
+{% endblock %}
+
