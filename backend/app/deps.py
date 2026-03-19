@@ -6,6 +6,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+from uuid import UUID
 
 from .config import settings
 from .database import get_db
@@ -30,6 +32,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
+def set_rls_user_id(db: Session, user_id: Optional[UUID]) -> None:
+    # RLS policies call `public.current_user_id()` which reads this setting.
+    uid = str(user_id) if user_id is not None else ""
+    db.execute(text("select set_config('app.user_id', :uid, true)"), {"uid": uid})
+
+
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
@@ -41,11 +49,16 @@ def get_current_user(
     )
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        user_id: int = payload.get("sub")
+        user_id_raw = payload.get("sub")
+        user_id = UUID(user_id_raw) if user_id_raw is not None else None
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
+
+    # Make RLS aware of the current user for this DB connection.
+    set_rls_user_id(db, user_id)
+
     user = db.get(models.User, user_id)
     if user is None:
         raise credentials_exception

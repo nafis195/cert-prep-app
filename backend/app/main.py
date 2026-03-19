@@ -3,12 +3,13 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from uuid import UUID
 
-from .database import engine, Base, get_db
+from .database import get_db
 from . import models
 from .routers import vendors, certifications, auth, ratings
-
-Base.metadata.create_all(bind=engine)
+from .routers.request_cert import router as request_cert_router
+from .routers.admin import router as admin_router
 
 app = FastAPI(title="Cert Prep App")
 
@@ -16,6 +17,8 @@ app.include_router(auth.router)
 app.include_router(vendors.router)
 app.include_router(certifications.router)
 app.include_router(ratings.router)
+app.include_router(request_cert_router)
+app.include_router(admin_router)
 
 app.mount("/static", StaticFiles(directory="backend/app/static"), name="static")
 templates = Jinja2Templates(directory="backend/app/templates")
@@ -32,7 +35,7 @@ def homepage(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/vendor/{vendor_id}", response_class=HTMLResponse)
 def vendor_certifications_page(
-    vendor_id: int,
+    vendor_id: UUID,
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -55,7 +58,7 @@ def vendor_certifications_page(
 
 @app.get("/certification/{cert_id}", response_class=HTMLResponse)
 def certification_detail_page(
-    cert_id: int,
+    cert_id: UUID,
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -66,7 +69,7 @@ def certification_detail_page(
             {"request": request, "cert": None},
             status_code=404,
         )
-    scores = [r.score for r in cert.ratings]
+    scores = [r.rating for r in cert.ratings]
     avg_rating = sum(scores) / len(scores) if scores else None
     return templates.TemplateResponse(
         "certification_detail.html",

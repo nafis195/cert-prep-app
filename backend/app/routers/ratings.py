@@ -30,12 +30,12 @@ def create_or_update_rating(
         rating = models.Rating(
             user_id=current_user.id,
             certification_id=rating_in.certification_id,
-            score=rating_in.score,
+            rating=rating_in.rating,
             comment=rating_in.comment,
         )
         db.add(rating)
     else:
-        rating.score = rating_in.score
+        rating.rating = rating_in.rating
         rating.comment = rating_in.comment
 
     db.commit()

@@ -7,11 +7,10 @@ load_dotenv()
 class Settings:
     PROJECT_NAME: str = "Cert Prep App"
 
-    # Default to a local SQLite database so the app runs without requiring
-    # a separate PostgreSQL server in development.
+    # Postgres DB for the UUID/RLS schema in `cert-prep-app/db/`.
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "sqlite:///./cert_prep_app.db",
+        "postgresql://postgres:postgres@localhost:5432/cert_prep_app",
     )
 
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "change-me")

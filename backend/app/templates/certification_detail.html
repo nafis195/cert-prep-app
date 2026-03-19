@@ -6,8 +6,8 @@
   <h2>{{ cert.name }}</h2>
   <p><strong>Vendor:</strong> {{ cert.vendor.name }}</p>
   <p><strong>Exam code:</strong> {{ cert.exam_code }}</p>
-  <p><strong>Level:</strong> {{ cert.level or "N/A" }}</p>
-  <p>{{ cert.full_description or cert.short_description }}</p>
+  <p><strong>Difficulty:</strong> {{ cert.difficulty or "N/A" }}</p>
+  <p>{{ cert.description or cert.summary }}</p>
 
   <p><strong>Average rating:</strong>
     {% if avg_rating %}{{ "%.1f"|format(avg_rating) }} / 5{% else %}No ratings yet{% endif %}

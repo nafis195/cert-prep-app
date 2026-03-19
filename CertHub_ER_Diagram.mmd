@@ -1,0 +1,66 @@
+erDiagram
+    vendors {
+        uuid id PK
+        text name
+        text slug UK
+        integer cert_count
+        timestamptz created_at
+    }
+
+    certifications {
+        uuid id PK
+        uuid vendor_id FK
+        text title
+        text exam_code
+        text description
+        text difficulty_level
+        text official_link
+        numeric average_rating
+        integer total_ratings
+        timestamptz created_at
+    }
+
+    profiles {
+        uuid id PK
+        uuid user_id UK
+        text email
+        text display_name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    user_roles {
+        uuid id PK
+        uuid user_id FK
+        app_role role
+    }
+
+    ratings {
+        uuid id PK
+        uuid user_id FK
+        uuid certification_id FK
+        integer score
+        text review_text
+        timestamptz created_at
+    }
+
+    certification_requests {
+        uuid id PK
+        uuid user_id FK
+        text vendor_name
+        text cert_title
+        text exam_code
+        text difficulty_level
+        text description
+        text official_link
+        text status
+        text admin_notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    vendors ||--o{ certifications : "has many"
+    certifications ||--o{ ratings : "has many"
+    profiles ||--o{ ratings : "submits"
+    profiles ||--o{ user_roles : "has"
+    profiles ||--o{ certification_requests : "submits"
