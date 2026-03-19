@@ -2,16 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>{{ title or "Cert Prep App" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title or "CertHub" }}</title>
   <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}" />
 </head>
 <body>
-  <header>
-    <h1><a href="/">Certification Preparation</a></h1>
-  </header>
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">C</div>
+        <div class="brand-text">CertHub</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">VENDORS</div>
+        <div class="sidebar-item {% if not active_vendor_id %}active{% endif %}">
+          <a href="{% if q %}/?q={{ q }}{% else %}/{% endif %}">All Vendors</a>
+          <span class="sidebar-count"></span>
+        </div>
+
+        {% if vendors %}
+          {% for vendor in vendors %}
+            <div class="sidebar-item {% if active_vendor_id and active_vendor_id == vendor.id|string %}active{% endif %}">
+              <a href="/?vendor_id={{ vendor.id }}{% if q %}&q={{ q }}{% endif %}">{{ vendor.name }}</a>
+              <span class="sidebar-count">{{ vendor_counts.get(vendor.id, 0) }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-name">CertHub</div>
+        </div>
+
+        <div class="topbar-right">
+          <a class="btn btn-ghost" href="/auth">Sign In</a>
+        </div>
+      </header>
+
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 

@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -12,12 +13,12 @@ router = APIRouter(prefix="/certifications", tags=["certifications"])
 
 @router.get("/", response_model=List[schemas.CertificationRead])
 def list_certifications(
-    vendor_id: Optional[int] = Query(default=None),
+    vendor_id: Optional[UUID] = Query(default=None),
     db: Session = Depends(get_db),
 ):
     query = db.query(
         models.Certification,
-        func.coalesce(func.avg(models.Rating.score), 0).label("avg_rating"),
+        func.coalesce(func.avg(models.Rating.rating), 0).label("avg_rating"),
     ).outerjoin(models.Rating).group_by(models.Certification.id)
 
     if vendor_id is not None:
@@ -33,11 +34,11 @@ def list_certifications(
 
 
 @router.get("/{cert_id}", response_model=schemas.CertificationRead)
-def get_certification(cert_id: int, db: Session = Depends(get_db)):
+def get_certification(cert_id: UUID, db: Session = Depends(get_db)):
     row = (
         db.query(
             models.Certification,
-            func.coalesce(func.avg(models.Rating.score), 0).label("avg_rating"),
+            func.coalesce(func.avg(models.Rating.rating), 0).label("avg_rating"),
         )
         .outerjoin(models.Rating)
         .filter(models.Certification.id == cert_id)

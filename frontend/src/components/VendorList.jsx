@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-function VendorList() {
+function VendorList({ onVendorSelect, searchTerm, vendorFilter }) {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/vendors') // Adjust URL as needed
+    fetch('http://localhost:8000/vendors')
       .then(response => response.json())
       .then(data => {
         setVendors(data);
@@ -18,19 +18,35 @@ function VendorList() {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const filteredVendors = vendors.filter(vendor => {
+    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = vendorFilter === 'all' || vendor.name.toUpperCase().includes(vendorFilter.toUpperCase());
+    return matchesSearch && matchesFilter;
+  });
+
+  if (loading) return <div className="loading">Loading vendors...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div>
-      <h2>Vendors</h2>
-      <ul>
-        {vendors.map(vendor => (
-          <li key={vendor.id}>
-            <a href={`/vendor/${vendor.id}`}>{vendor.name}</a>
-          </li>
+    <div className="vendor-list">
+      <h2>Choose a Certification Vendor</h2>
+      <div className="vendor-grid">
+        {filteredVendors.map(vendor => (
+          <div
+            key={vendor.id}
+            className="vendor-card"
+            onClick={() => onVendorSelect(vendor)}
+          >
+            <h3>{vendor.name}</h3>
+            <p>{vendor.description || 'Professional certification provider'}</p>
+            <div className="card-arrow">→</div>
+          </div>
         ))}
-      </ul>
+      </div>
+      {filteredVendors.length === 0 && (
+        <div className="no-results">No vendors found matching your criteria.</div>
+      )}
     </div>
   );
 }

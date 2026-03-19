@@ -1,11 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Select a vendor</h2>
-<select id="vendor-select" onchange="if(this.value) window.location='/vendor/' + this.value;">
-  <option value="">-- Choose vendor --</option>
-  {% for vendor in vendors %}
-    <option value="{{ vendor.id }}">{{ vendor.name }}</option>
-  {% endfor %}
-</select>
+  <div class="hero">
+    <div class="hero-title">Certifications</div>
+    <div class="hero-subtitle">Browse, compare, and rate IT certifications across top vendors.</div>
+
+    <form class="search" method="get" action="/">
+      <input
+        class="search-input"
+        type="text"
+        name="q"
+        placeholder="Search by title or exam code..."
+        value="{{ q or '' }}"
+      />
+      <input type="hidden" name="vendor_id" value="{{ active_vendor_id or '' }}" />
+      <button class="search-button" type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="cards-grid">
+    {% for item in cards %}
+      {% set cert = item.cert %}
+      <a class="cert-card" href="/certification/{{ cert.id }}">
+        <div class="cert-card-top">
+          <div class="exam-code">{{ cert.exam_code }}</div>
+          {% if difficulty_labels is defined %}
+            {% set badge = difficulty_labels.get(cert.difficulty, '') %}
+            {% if badge %}
+              <div class="difficulty-badge">{{ badge }}</div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <div class="cert-card-body">
+          <div class="cert-title">{{ cert.name }}</div>
+          <div class="cert-summary">{{ cert.summary or cert.description }}</div>
+        </div>
+
+        <div class="cert-card-bottom">
+          <div class="stars">
+            {% set full = (item.avg_rating or 0) | int %}
+            {% for i in range(1, 6) %}
+              {% if i <= full %}
+                <span class="star star-filled">★</span>
+              {% else %}
+                <span class="star star-empty">★</span>
+              {% endif %}
+            {% endfor %}
+            <span class="rating-number">{{ item.avg_rating|default(0) | round(1) }}</span>
+            <span class="rating-count">({{ item.rating_count }})</span>
+          </div>
+          <div class="cert-vendor">{{ item.vendor_name }}</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
 {% endblock %}
 

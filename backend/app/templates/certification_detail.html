@@ -1,17 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-{% if not cert %}
-  <p>Certification not found.</p>
-{% else %}
-  <h2>{{ cert.name }}</h2>
-  <p><strong>Vendor:</strong> {{ cert.vendor.name }}</p>
-  <p><strong>Exam code:</strong> {{ cert.exam_code }}</p>
-  <p><strong>Level:</strong> {{ cert.level or "N/A" }}</p>
-  <p>{{ cert.full_description or cert.short_description }}</p>
+  {% if not cert %}
+    <div class="empty-state">Certification not found.</div>
+  {% else %}
+    <div class="detail-hero">
+      <div class="detail-top">
+        <div>
+          <div class="exam-code exam-code-lg">{{ cert.exam_code }}</div>
+          <h2 class="detail-title">{{ cert.name }}</h2>
+        </div>
+        <div class="detail-badges">
+          {% if difficulty_labels is defined %}
+            {% set badge = difficulty_labels.get(cert.difficulty, "") %}
+            {% if badge %}
+              <div class="difficulty-badge difficulty-badge-lg">{{ badge }}</div>
+            {% endif %}
+          {% endif %}
+          <div class="vendor-pill">{{ cert.vendor.name }}</div>
+        </div>
+      </div>
 
-  <p><strong>Average rating:</strong>
-    {% if avg_rating %}{{ "%.1f"|format(avg_rating) }} / 5{% else %}No ratings yet{% endif %}
-  </p>
-{% endif %}
+      <div class="detail-rating">
+        <div class="stars">
+          {% set full = (avg_rating or 0) | int %}
+          {% for i in range(1, 6) %}
+            {% if i <= full %}
+              <span class="star star-filled">★</span>
+            {% else %}
+              <span class="star star-empty">★</span>
+            {% endif %}
+          {% endfor %}
+          <span class="rating-number">{{ avg_rating|default(0)|round(1) }}</span>
+          <span class="rating-outof">/ 5</span>
+        </div>
+        <a class="btn btn-primary" href="/auth">Rate this certification</a>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="panel">
+        <h3 class="panel-title">Overview</h3>
+        <p class="panel-text">{{ cert.description or cert.summary }}</p>
+        {% if cert.official_url %}
+          <a class="link" href="{{ cert.official_url }}" target="_blank" rel="noopener">Official exam page</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}
 
