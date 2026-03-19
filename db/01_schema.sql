@@ -5,9 +5,27 @@
 
 begin;
 
-create type public.difficulty_level as enum ('beginner', 'intermediate', 'advanced');
-create type public.request_status as enum ('pending', 'approved', 'rejected');
-create type public.app_role as enum ('user', 'admin');
+-- Enums: make creation idempotent so you can re-run this script safely.
+do $$
+begin
+  create type public.difficulty_level as enum ('beginner', 'intermediate', 'advanced');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  create type public.request_status as enum ('pending', 'approved', 'rejected');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  create type public.app_role as enum ('user', 'admin');
+exception
+  when duplicate_object then null;
+end $$;
 
 -- USERS
 -- If you use Supabase, DO NOT create this table; use auth.users instead.

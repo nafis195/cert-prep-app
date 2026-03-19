@@ -96,7 +96,6 @@ class Profile(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False)
 
     user = relationship("User", back_populates="profile")
-    ratings = relationship("Rating", back_populates="user")
 
 
 class UserRole(Base):
